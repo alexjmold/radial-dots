@@ -14,11 +14,12 @@ export default {
 			height: 0,
 			dots: [],
 			background: '#EFFFFA',
-			dotsPerLayer: [1, 8, 16, 24, 32, 40, 48, 56, 64, 72],
+			dotsPerLayer: [1, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96],
 			colours: ['#C3BEF7', '#E5A4CB', '#80CED7', '#EDBBB4'],
 			layerSpacing: 90,
-			dotRadius: 25,
+			dotRadius: 10,
 			clickCount: [],
+			rotationDirections: [],
 		};
 	},
 	mounted() {
@@ -30,6 +31,7 @@ export default {
 
 		for (let i = 0; i < this.dotsPerLayer.length; i += 1) {
 			this.clickCount.push(1);
+			this.rotationDirections.push(true);
 		}
 
 		window.addEventListener('resize', this.resizeCanvas);
@@ -79,11 +81,36 @@ export default {
 				this.dots[i].update();
 			}
 		},
-		handleRotate(index) {
+		handleRotate(index, clockwise) {
+
+			/**
+			 * Index refers to which layer
+			 * we will be rotating.
+			 *
+			 * 0 = middle, 1 = 1 row from center and so on.
+			 */
 
 			if (!index) return;
-
 			const layer = index;
+
+			/**
+			 * Direction
+			 * True = clockwise
+			 * False = anti-clockwise
+			 */
+
+			let direction = false;
+			if (clockwise) direction = clockwise;
+
+			if (!direction) {
+				if (this.rotationDirections[layer] === true) {
+					this.clickCount[layer] -= 2;
+				}
+			} else {
+				if (!this.rotationDirections[layer]) {
+					this.clickCount[layer] += 2;
+				}
+			}
 
 			// Get reference array of dots with the layer we want to move.
 			const dotsToTransform = this.dots.filter(dot => dot.layer === layer);
@@ -91,33 +118,49 @@ export default {
 			// Calculate the step size for this layer
 			const step = (Math.PI * 2) / dotsToTransform.length;
 
-			let angle = step * this.clickCount[layer];
+			let angle = (step * this.clickCount[layer]);
 
 			for (let i = 0; i < dotsToTransform.length; i += 1) {
 				const x = (this.width / 2) + ((this.layerSpacing + this.dotRadius) * layer) * Math.cos(angle);
 				const y = (this.height / 2) + ((this.layerSpacing + this.dotRadius) * layer) * Math.sin(angle);
 
-				// dotsToTransform[i].position.x = x;
-				// dotsToTransform[i].position.y = y;
 				dotsToTransform[i].destination.x = x;
 				dotsToTransform[i].destination.y = y;
 				angle += step;
 			}
 
-			this.clickCount[layer]++;
+			if (direction) {
+				this.clickCount[layer]++;
+			} else {
+				this.clickCount[layer]--;
+			}
+
+			this.rotationDirections[layer] = direction;
 		},
 		handleKeyInput(event) {
 			const key = event.key;
+
 			const n = parseInt(event.key);
+
 			if (!isNaN(n)) {
-				this.handleRotate(n);
+				this.handleRotate(n, true);
+			}
+
+			if (key === 'ArrowLeft') {
+				this.rotateAll(false);
+			} else if (key === 'ArrowRight') {
+				this.rotateAll(true);
 			}
 		},
-		handleClick() {
+		handleClick(event) {
+			const direction = ((event.clientX * window.devicePixelRatio) > (this.width / 2)) ? true : false;
+			this.rotateAll(direction);
+		},
+		rotateAll(direction) {
 			for (let i = 0; i < this.clickCount.length; i += 1) {
-				this.handleRotate(i);
+				this.handleRotate(i, direction);
 			}
-		},
+		}
 	},
 };
 </script>
