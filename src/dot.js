@@ -1,12 +1,12 @@
 export default class Dot {
-	constructor(_context, _position, _destination, _layer, _radius, _fill) {
+	constructor(_context, _position, _destination, _layer, _radius, _fill, _easing) {
 		this.context = _context;
 		this.position = _position;
 		this.destination = _destination;
 		this.layer = _layer;
 		this.radius = _radius;
 		this.fill = _fill;
-		this.easing = 0.08;
+		this.easing = _easing;
 	}
 
 	draw() {

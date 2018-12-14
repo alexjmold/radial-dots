@@ -14,12 +14,13 @@ export default {
 			height: 0,
 			dots: [],
 			background: '#EFFFFA',
-			dotsPerLayer: [1, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96],
+			dotsPerLayer: [1, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88],
 			colours: ['#C3BEF7', '#E5A4CB', '#80CED7', '#EDBBB4'],
 			layerSpacing: 90,
-			dotRadius: 10,
+			dotRadius: 20,
 			clickCount: [],
 			rotationDirections: [],
+			easingBase: 0.015,
 		};
 	},
 	mounted() {
@@ -56,14 +57,16 @@ export default {
 					const y = (this.height / 2) + ((this.layerSpacing + this.dotRadius) * i) * Math.sin(angle);
 
 					angle += step;
+					const easing = (this.dotsPerLayer.length - i) * this.easingBase;
 
 					const dot = new Dot(
 						this.context,
 						{x: this.width / 2, y: this.height / 2},
 						{x: x, y: y},
 						i,
-						this.dotRadius,
+						this.dotRadius * Math.random(),
 						this.colours[Math.floor(Math.random() * this.colours.length)],
+						easing,
 					);
 
 					this.dots.push(dot);
